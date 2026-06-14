@@ -148,6 +148,14 @@ select.mini{padding:8px 11px}
 .good{color:#9DE6B4}.bad{color:#E7A9A9}
 .pfeed .pts{font-family:var(--fd);font-weight:900;font-size:42px;color:var(--gold)}
 .pfeed .rk{background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:12px;padding:9px 20px;font-family:var(--fh);font-weight:700;color:#D6E0EC}
+.pcorrect{font-family:var(--fb);font-size:15px;color:#D6E0EC;background:rgba(157,230,180,.12);border:1px solid rgba(157,230,180,.35);border-radius:12px;padding:10px 16px;line-height:1.75;max-width:340px}
+.pcorrect b{color:#9DE6B4;font-family:var(--fh)}
+.ptop{width:100%;max-width:340px;margin-top:4px}
+.ptop .pt-h{font-family:var(--fh);color:var(--goldL);font-size:12px;letter-spacing:1.5px;margin-bottom:6px;text-align:center}
+.ptop .pt-r{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:7px 12px;margin-bottom:5px;font-family:var(--fd);font-weight:700;font-size:14px}
+.ptop .pt-r .pt-n{flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptop .pt-r .pt-s{color:var(--gold);font-family:var(--fh)}
+.ptop .pt-r:first-child{background:rgba(201,169,97,.16);border-color:var(--gold)}
 .hidden{display:none!important}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--maroon);color:#fff;padding:12px 22px;border-radius:12px;font-family:var(--fh);font-weight:700;z-index:90;display:none}
 .cd{position:fixed;inset:0;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;backdrop-filter:blur(5px);background:radial-gradient(60% 60% at 50% 45%,rgba(20,40,63,.96),rgba(8,16,28,.97))}
@@ -190,6 +198,7 @@ select.mini{padding:8px 11px}
     <div class="qrcard"><div id="qrcanvas"></div><div class="joinurl" id="joinUrl"></div>
       <input id="pubUrl" class="inp" style="font-size:11px;padding:7px;margin-top:8px;width:210px" placeholder="ألصقي الرابط العام (اختياري)">
       <button class="mini" style="margin-top:6px;width:210px" onclick="HOST.setPubUrl()">تحديث رمز QR للرابط العام</button>
+      <button class="mini" style="margin-top:6px;width:210px;background:rgba(201,169,97,.22);border-color:var(--gold);color:#fff" onclick="HOST.copyLink()">🔗 نسخ رابط الطلاب (للطلاب عن بُعد)</button>
     </div>
     <div class="lobby-r">
       <h1>انضمّوا إلى <b>أكاديمية القادة</b></h1>
@@ -260,8 +269,10 @@ select.mini{padding:8px 11px}
   <div class="ic" id="pfIcon"></div>
   <div class="ttl" id="pfTitle"></div>
   <div class="pts hidden" id="pfPts"></div>
+  <div class="pcorrect hidden" id="pfCorrect"></div>
   <div class="rk hidden" id="pfRank"></div>
   <div class="rk" id="pfScore"></div>
+  <div class="ptop hidden" id="pfTop"></div>
 </div></div></section>
 
 <section class="scr" id="p-podium"><div class="pwrap"><div class="pcenter pwait">

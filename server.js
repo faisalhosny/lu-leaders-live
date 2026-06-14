@@ -99,7 +99,7 @@ function reveal(r) {
   io.to(r.hostSock).emit('host:reveal', { correct: r.curCorrect, counts: counts(r), fastest, leaderboard, top, index: r.qIndex, total: r.questions.length, answered: answeredCount(r), totalPlayers: ps.length });
   ps.forEach(p => {
     const rank = correctOnes.findIndex(x => x.sid === p.sid);
-    io.to(p.sid).emit('player:reveal', { correct: p.lastCorrect, points: p.lastPoints, score: p.score, speedRank: p.lastCorrect ? rank + 1 : null, correctCount: correctOnes.length, correctIndex: r.curCorrect });
+    io.to(p.sid).emit('player:reveal', { correct: p.lastCorrect, points: p.lastPoints, score: p.score, speedRank: p.lastCorrect ? rank + 1 : null, correctCount: correctOnes.length, correctIndex: r.curCorrect, correctText: r.curOpts[r.curCorrect], top: leaderboard.slice(0, 3) });
   });
 }
 

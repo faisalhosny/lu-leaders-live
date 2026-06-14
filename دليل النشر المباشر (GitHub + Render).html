@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>دليل النشر المباشر — أكاديمية القادة (النسخة الحية)</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Sans+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1E3A5F;--deep:#10223A;--gold:#C9A961;--goldL:#EAD9B0;--maroon:#8B1A1A;--cream:#FAF6EC;--ink:#2B2B2B;--gray:#5A5A5A;--line:#E5E0D5;--green:#3F7A52}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;color:var(--ink);background:#fff;font-size:14px;line-height:1.85}
+.page{max-width:900px;margin:0 auto;padding:30px 38px}
+h1{font-family:'IBM Plex Sans Arabic';color:var(--navy);font-size:26px;border-bottom:3px solid var(--gold);padding-bottom:10px}
+.sub{color:var(--gray);font-size:13px;margin:6px 0 18px}
+h2{font-family:'IBM Plex Sans Arabic';color:var(--maroon);font-size:18px;margin:22px 0 8px;display:flex;align-items:center;gap:8px}
+h2::before{content:'';width:5px;height:19px;background:var(--gold);border-radius:3px;display:inline-block}
+ol,ul{padding-right:24px}li{margin-bottom:7px}
+.step{border:1.5px solid var(--line);border-radius:12px;padding:14px 18px;margin:10px 0}
+.step b{color:var(--navy);font-family:'IBM Plex Sans Arabic'}
+.tip{background:var(--cream);border-right:4px solid var(--gold);border-radius:8px;padding:11px 15px;margin:10px 0}
+.warn{background:#FDF1F1;border-right-color:var(--maroon)}
+code{background:#F2EEE3;border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-family:Consolas,monospace;direction:ltr;display:inline-block}
+.path{background:#0C1A2E;color:var(--goldL);border-radius:8px;padding:8px 12px;font-family:Consolas,monospace;direction:ltr;display:inline-block;font-size:13px}
+table{width:100%;border-collapse:collapse;margin:8px 0}
+th{background:var(--navy);color:var(--goldL);font-family:'IBM Plex Sans Arabic';font-weight:600;padding:8px;font-size:13px}
+td{border:1px solid var(--line);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:var(--cream)}
+.foot{margin-top:26px;padding-top:10px;border-top:1px solid var(--line);color:var(--gray);font-size:11.5px;text-align:center}
+@page{margin:12mm}
+</style>
+</head>
+<body>
+<div class="page">
+<h1>دليل النشر المباشر 🚀 — أكاديمية القادة (النسخة الحية)</h1>
+<div class="sub">نشر التطبيق على الإنترنت برابط دائم يدخل عليه الطلاب من أي مكان · إعداد: إيمان الحصني · جامعة لوسيل</div>
+
+<h2>الفكرة في سطر</h2>
+<p>نرفع كود التطبيق إلى <b>GitHub</b> (مستودعك)، ثم نربطه بخدمة استضافة <b>Render</b> التي تشغّله وتعطيك رابطاً عاماً دائماً مثل <code>https://lu-leaders-live.onrender.com</code>. تفتحينه على شاشة القاعة، ويدخل الطلاب من هواتفهم بمسح رمز QR. <b>لا تبدأ اللعبة إلا بضغطك على زر «ابدأ اللعبة»</b> بعد تأكدك من انضمام الجميع.</p>
+
+<h2>الجزء الأول — الرفع إلى GitHub (مرة واحدة)</h2>
+<div class="step"><b>1)</b> سجّلي الدخول إلى <code>github.com</code> ← زر <b>New</b> ← أنشئي مستودعاً جديداً فارغاً باسم <code>lu-leaders-live</code> (Public أو Private)، <b>دون</b> تعليم README، ثم <b>Create</b>، وانسخي رابطه المنتهي بـ <code>.git</code>.</div>
+<div class="step"><b>2)</b> على جهازك، افتحي المجلد: <span class="path">C:\Users\faisa\lu_live</span> وانقري نقراً مزدوجاً على <b>push.bat</b>، ثم الصقي رابط المستودع عند الطلب. (سيفتح المتصفح لتسجيل الدخول إلى GitHub أول مرة — وافقي.)</div>
+<div class="tip">يتطلب وجود <b>Git</b> على الجهاز (مجاني من <code>git-scm.com</code>). إن لم يكن مثبتاً، ثبّتيه ثم أعيدي تشغيل push.bat. بدّلي الأمر داخل push.bat ليس ضرورياً — هو يسألك عن الرابط فقط.</div>
+
+<h2>الجزء الثاني — النشر على Render (مرة واحدة)</h2>
+<div class="step"><b>3)</b> ادخلي <code>render.com</code> وأنشئي حساباً مجانياً (يمكن الدخول بحساب GitHub مباشرة).</div>
+<div class="step"><b>4)</b> <b>New ← Web Service ← Build and deploy from a Git repository</b>، واختاري مستودع <code>lu-leaders-live</code>.</div>
+<div class="step"><b>5)</b> سيكتشف Render أنه Node تلقائياً (Build: <code>npm install</code> · Start: <code>node server.js</code> · Plan: <b>Free</b>). اضغطي <b>Create Web Service</b> وانتظري دقيقتين.</div>
+<div class="step"><b>6)</b> ستحصلين على الرابط العام الدائم أعلى الصفحة. هذا رابط اللعبة. افتحيه على شاشة القاعة ← <b>أنا المحاضِرة</b> ← يظهر رمز QR والرمز الرقمي للطلاب.</div>
+<div class="tip warn"><b>مهم عن الباقة المجانية:</b> تنام الخدمة المجانية بعد ١٥ دقيقة خمول وتستيقظ خلال ~٥٠ ثانية. لذلك <b>افتحي الرابط قبل المحاضرة بدقيقتين</b> ليستيقظ. لضمان جاهزية فورية طوال أسبوع الامتحان، رقّي الخدمة إلى <b>Starter (٧ دولار/شهر)</b> ثم ألغيها بعد الأسبوع. (Render يدعم WebSockets التي يحتاجها التطبيق.)</div>
+
+<h2>كيف «يسجّل» الطلاب الدخول؟</h2>
+<p>كما في Kahoot تماماً: <b>لا كلمات مرور ولا حسابات</b>. يمسح الطالب رمز QR (أو يفتح الرابط ويُدخل الرمز الرقمي المكوّن من ٤ أرقام)، ثم يكتب اسمه. الرمز الرقمي للغرفة هو ما يحمي جلستك — لا يدخل لعبتك إلا من يملك الرمز/الرمز المعروض على شاشتك.</p>
+
+<h2>أفضل ممارسات التوقيت (مطبّقة في التطبيق)</h2>
+<table>
+<tr><th style="width:26%">المرحلة</th><th>التوصية والتطبيق</th></tr>
+<tr><td>غرفة الانتظار</td><td>لا تبدأ اللعبة تلقائياً أبداً. تظهر أسماء المنضمّين فوراً على شاشتك، وتبدئين أنتِ عند جاهزية الجميع بزر <b>«ابدأ اللعبة»</b> (مُعطّل حتى ينضم طالب واحد على الأقل).</td></tr>
+<tr><td>قبل أول سؤال</td><td>عدّ تنازلي مُتزامن <b>٣–٢–١</b> على كل الأجهزة لينتبه الطلاب وينظروا للشاشة.</td></tr>
+<tr><td>زمن السؤال</td><td>من ١٠ إلى ٢٠ ثانية (تختارينه في غرفة الانتظار). الأسرع في الإجابة الصحيحة يحصل على نقاط أعلى.</td></tr>
+<tr><td>كشف الإجابة</td><td>تظهر الإجابة الصحيحة + أسرع ١٠ طلاب + المتصدّر، وتتقدّمين أنتِ بزر <b>«التالي»</b> — وهي لحظة المناقشة الصفّية قبل الانتقال.</td></tr>
+</table>
+<div class="tip">التوقيت محسوب على الخادم (server-authoritative) فيكون عادلاً للجميع بغضّ النظر عن سرعة الإنترنت لدى كل طالب.</div>
+
+<h2>تحديث المحتوى لاحقاً</h2>
+<p>عدّلي الأسئلة في ملف Excel واستورديها من زر <b>«استيراد أسئلة (Excel)»</b> في غرفة الانتظار — دون أي برمجة. ولأي تعديل على الكود، يكفي تشغيل <b>push.bat</b> مرة أخرى؛ سيُحدّث Render النشر تلقائياً.</p>
+
+<div class="foot">أكاديمية القادة — النسخة الحية · النشر المباشر · إعداد: إيمان الحصني — جامعة لوسيل · للطباعة: Ctrl+P</div>
+</div>
+</body>
+</html>

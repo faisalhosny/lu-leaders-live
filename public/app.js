@@ -76,6 +76,12 @@ const HOST = {
     if(window.QRCode){ const qb=$('qrcanvas'); qb.innerHTML=''; new QRCode(qb,{text:url,width:200,height:200,colorDark:'#0C1A2E',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}); }
     toast('تم تحديث رمز QR للرابط العام');
   },
+  copyLink(){
+    let base=($('pubUrl').value||'').trim().replace(/\/+$/,''); if(base&&!/^https?:\/\//.test(base)) base='https://'+base;
+    const url=(base||location.origin)+'/?room='+ROOM;
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(()=>toast('تم نسخ رابط الطلاب — ألصقيه في منصة الطلاب أو المحادثة'),()=>toast(url)); }
+    else { toast(url); }
+  },
   importXlsx(ev){
     const f=ev.target.files[0]; if(!f) return;
     const rd=new FileReader();
@@ -187,10 +193,12 @@ const PLAYER = {
     $('pfIcon').textContent=d.correct?'✅':'❌';
     $('pfTitle').textContent=d.correct?'إجابة صحيحة!':'إجابة غير صحيحة';
     $('pfTitle').className='ttl '+(d.correct?'good':'bad');
-    const pts=$('pfPts'), rk=$('pfRank');
+    const pts=$('pfPts'), rk=$('pfRank'), cr=$('pfCorrect'), tp=$('pfTop');
     if(d.correct){ pts.textContent='+'+d.points; pts.classList.remove('hidden'); } else pts.classList.add('hidden');
-    if(d.correct&&d.speedRank){ rk.textContent=`ترتيب سرعتك: ${d.speedRank} من ${d.correctCount}`; rk.classList.remove('hidden'); } else rk.classList.add('hidden');
+    if(d.correctText){ cr.innerHTML=`الإجابة الصحيحة:<br><b>${d.correctText}</b>`; cr.classList.remove('hidden'); } else cr.classList.add('hidden');
+    if(d.correct&&d.speedRank){ rk.textContent=`⚡ ترتيب سرعتك: ${d.speedRank} من ${d.correctCount}`; rk.classList.remove('hidden'); } else rk.classList.add('hidden');
     $('pfScore').innerHTML=`رصيدك: <span class="num">${d.score}</span>`;
+    if(d.top&&d.top.length){ tp.innerHTML=`<div class="pt-h">المتصدّرون</div>`+d.top.map((p,i)=>`<div class="pt-r"><span>${['🥇','🥈','🥉'][i]||''}</span><span class="pt-n">${p.name}</span><span class="pt-s num">${p.score}</span></div>`).join(''); tp.classList.remove('hidden'); } else tp.classList.add('hidden');
     show('p-reveal');
   },
   over(d){
