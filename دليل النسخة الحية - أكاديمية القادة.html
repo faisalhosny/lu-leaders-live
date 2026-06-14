@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>دليل النسخة الحية — أكاديمية القادة</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Sans+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1E3A5F;--deep:#10223A;--gold:#C9A961;--goldL:#EAD9B0;--maroon:#8B1A1A;--cream:#FAF6EC;--ink:#2B2B2B;--gray:#5A5A5A;--line:#E5E0D5;--green:#3F7A52}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;color:var(--ink);background:#fff;font-size:14px;line-height:1.85}
+.page{max-width:900px;margin:0 auto;padding:30px 38px}
+h1{font-family:'IBM Plex Sans Arabic';color:var(--navy);font-size:27px;border-bottom:3px solid var(--gold);padding-bottom:10px}
+.sub{color:var(--gray);font-size:13px;margin:6px 0 18px}
+h2{font-family:'IBM Plex Sans Arabic';color:var(--maroon);font-size:18px;margin:22px 0 8px;display:flex;align-items:center;gap:8px}
+h2::before{content:'';width:5px;height:19px;background:var(--gold);border-radius:3px;display:inline-block}
+h3{font-family:'IBM Plex Sans Arabic';color:var(--navy);font-size:15.5px;margin:12px 0 4px}
+ul,ol{padding-right:24px}li{margin-bottom:5px}
+.tip{background:var(--cream);border-right:4px solid var(--gold);border-radius:8px;padding:11px 15px;margin:10px 0}
+.tip b{color:var(--navy)}
+.warn{background:#FDF1F1;border-right:4px solid var(--maroon)}
+.opt{border:1.5px solid var(--line);border-radius:12px;padding:14px 18px;margin:10px 0}
+.opt .badge{display:inline-block;background:var(--green);color:#fff;border-radius:999px;font-size:12px;font-weight:700;padding:3px 12px;margin-bottom:6px;font-family:'IBM Plex Sans Arabic'}
+.opt.b2 .badge{background:var(--navy)} .opt.b3 .badge{background:var(--gray)}
+code{background:#F2EEE3;border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-family:Consolas,monospace;direction:ltr;display:inline-block}
+.foot{margin-top:26px;padding-top:10px;border-top:1px solid var(--line);color:var(--gray);font-size:11.5px;text-align:center}
+@page{margin:12mm} @media print{.page{padding:0}}
+</style>
+</head>
+<body>
+<div class="page">
+<h1>دليل النسخة الحية 📡 — أكاديمية القادة</h1>
+<div class="sub">لعبة جماعية حية على هواتف الطلاب (بأسلوب البرامج التفاعلية) · مقرر القيادة والريادة والابتكار · جامعة لوسيل · إعداد: إيمان الحصني</div>
+
+<h2>ما هذه النسخة؟</h2>
+<p>تطبيق لعب جماعي حيّ: يفتح المحاضِر اللعبة على شاشة القاعة فيظهر رمز QR ورمز غرفة من 4 أرقام. يمسح الطلاب الرمز بهواتفهم، يُدخلون أسماءهم، ثم يجيبون عن كل سؤال خلال ١٠–٢٠ ثانية. عند كشف الإجابة تظهر <b>أسرع ١٠ طلاب</b> مرتّبين من الأسرع إلى الأبطأ، ويبقى <b>المتصدّر</b> ظاهراً حتى نهاية البطولة. الأسرع في الإجابة الصحيحة يحصل على نقاط أعلى.</p>
+
+<h2>كيف تحصلين على «الرابط العام» للطلاب؟ (ثلاثة خيارات)</h2>
+
+<div class="opt"><span class="badge">الأسهل والأسرع — مُوصى به</span>
+<h3>الخيار 1: تشغيل من اللابتوب + رابط عام فوري</h3>
+<ol>
+<li>تأكّدي من تثبيت <b>Node.js</b> (مجاني من <code>nodejs.org</code> — اختاري LTS، مرة واحدة فقط).</li>
+<li>انقري نقراً مزدوجاً على ملف <b>«تشغيل اللعبة الحية.bat»</b>.</li>
+<li>سيفتح المتصفح على شاشة المحاضِرة، وستظهر في النافذة السوداء رسالة تحتوي رابطاً ينتهي بـ <code>trycloudflare.com</code>.</li>
+<li>انسخي ذلك الرابط، والصقيه في خانة «ألصقي الرابط العام» أسفل رمز QR داخل اللعبة، ثم اضغطي «تحديث رمز QR». الآن يصل الطلاب من أي مكان.</li>
+</ol>
+<div class="tip">يبقى الرابط فعّالاً ما دامت النافذة السوداء مفتوحة واللابتوب يعمل. لا يحتاج حساباً ولا استضافة.</div>
+</div>
+
+<div class="opt b2"><span class="badge">رابط دائم بلا لابتوب — بدون GitHub</span>
+<h3>الخيار 2: استضافة مجانية على Glitch</h3>
+<ol>
+<li>ادخلي <code>glitch.com</code> وأنشئي حساباً مجانياً.</li>
+<li>New Project ← Import from Folder/ZIP، وارفعي مجلد التطبيق (بدون مجلد <code>node_modules</code>).</li>
+<li>سيشغّله Glitch تلقائياً ويمنحك رابطاً عاماً دائماً مثل <code>https://اسم-مشروعك.glitch.me</code>.</li>
+<li>افتحي ذلك الرابط على شاشة القاعة مباشرةً — سيكون رمز QR صحيحاً تلقائياً.</li>
+</ol>
+<div class="tip">قد ينام المشروع المجاني عند عدم الاستخدام؛ افتحي الرابط قبل المحاضرة بدقيقة ليستيقظ.</div>
+</div>
+
+<div class="opt b3"><span class="badge">الأكثر ثباتاً — يتطلب GitHub</span>
+<h3>الخيار 3: استضافة على Render</h3>
+<ol>
+<li>ارفعي مجلد التطبيق إلى مستودع على <code>github.com</code>.</li>
+<li>في <code>render.com</code>: New ← Web Service، اربطي المستودع. Build: <code>npm install</code> · Start: <code>node server.js</code>.</li>
+<li>ستحصلين على رابط عام دائم تفتحينه على شاشة القاعة.</li>
+</ol>
+</div>
+
+<h2>طريقة اللعب في القاعة</h2>
+<ol>
+<li>افتحي اللعبة على شاشة القاعة ← «أنا المحاضِرة — ابدئي غرفة جديدة».</li>
+<li>اعرضي رمز QR ورمز الغرفة؛ ينضمّ الطلاب ويُدخلون أسماءهم (تظهر فوراً أمامك).</li>
+<li>اختاري زمن السؤال (10 / 15 / 20 ثانية) ثم «ابدأ اللعبة».</li>
+<li>يظهر السؤال على الشاشة وعلى الهواتف؛ يختار كل طالب الشكل/اللون المطابق.</li>
+<li>عند الكشف: تظهر الإجابة الصحيحة + قائمة أسرع ١٠ طلاب + المتصدّر. اضغطي «التالي».</li>
+<li>في النهاية: منصة الأبطال، مع زر «تصدير النتائج (Excel)».</li>
+</ol>
+
+<h2>الربط مع ملف Excel (استيراد/تصدير)</h2>
+<ul>
+<li><b>استيراد الأسئلة:</b> في شاشة الانتظار اضغطي «⬆ استيراد أسئلة (Excel)» واختاري ملف «أكاديمية القادة - مراجعة الأسئلة والإجابات.xlsx». يقرأ التطبيق ورقة «ساحة النخبة» (السؤال + الإجابة الصحيحة الخضراء + المشتّتات) ويحمّلها تلقائياً.</li>
+<li><b>تعديل المحتوى:</b> عدّلي الأسئلة في ملف Excel نفسه (الإجابة الصحيحة في العمود الأخضر)، ثم استورديه — لا حاجة لتعديل البرمجة.</li>
+<li><b>تصدير النتائج:</b> في نهاية البطولة اضغطي «⬇ تصدير النتائج (Excel)» لحفظ ترتيب الطلاب ونقاطهم في ملف Excel.</li>
+</ul>
+
+<div class="tip warn"><b>ملاحظات مهمة:</b> النسخة الحية تحتاج إنترنت (للطلاب والمحاضِرة معاً). الألعاب الفردية الخمس تبقى كما هي للتدريب دون إنترنت. عند أول تشغيل للخادم قد يطلب «جدار الحماية» السماح — اضغطي Allow.</div>
+
+<div class="foot">أكاديمية القادة — النسخة الحية · إعداد: إيمان الحصني · مقرر القيادة والريادة والابتكار — جامعة لوسيل · للطباعة: Ctrl+P</div>
+</div>
+</body>
+</html>
