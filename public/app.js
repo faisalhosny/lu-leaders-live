@@ -208,7 +208,7 @@ const PLAYER = {
     socket.emit('player:join',{code:ROOM,name},res=>{
       if(res.error){ $('pErr').textContent=res.error; return; }
       ROLE='player';
-      $('pwName').textContent=res.name; $('pwIcon').textContent='✅'; $('pwMsg').textContent='تم الانضمام!'; $('pwSub').textContent='في انتظار بدء المحاضِرة...';
+      $('pwName').textContent=res.name; $('pwIcon').textContent='✅'; $('pwMsg').textContent='تم الانضمام!'; $('pwSub').textContent='في انتظار بدء المحاضِر...';
       show('p-wait');
     });
   },
@@ -263,7 +263,7 @@ socket.on('q:show', p=>{ hideCountdown(); if(ROLE==='host') HOST.question(p); el
 socket.on('player:ack', d=>PLAYER.ack(d));
 socket.on('player:reveal', d=>PLAYER.reveal(d));
 socket.on('player:over', d=>PLAYER.over(d));
-socket.on('room:closed', ()=>{ toast('أُغلقت الغرفة من قِبل المحاضِرة'); setTimeout(()=>location.href=location.origin,1800); });
+socket.on('room:closed', ()=>{ toast('أُغلقت الغرفة من قِبل المحاضِر'); setTimeout(()=>location.href=location.origin,1800); });
 socket.on('connect_error', ()=>toast('تعذّر الاتصال بالخادم'));
 
 /* deep link ?room=CODE → player join */
