@@ -6,7 +6,7 @@ const Q = JSON.parse(fs.readFileSync(__dirname + '/questions.json', 'utf8'));
 const URL = 'http://localhost:3000';
 const log = (...a) => console.log(...a);
 
-const mkHost = () => new Promise(r => { const s = io(URL); s.on('connect', () => s.emit('host:create', { timeLimit: 10 }, x => r({ s, ...x }))); });
+const mkHost = () => new Promise(r => { const s = io(URL); s.on('connect', () => s.emit('host:create', { user: 'iman', password: 'Leaders2026', timeLimit: 10 }, x => r({ s, ...x }))); });
 const mkPlayer = (code, name) => new Promise(r => { const s = io(URL); s.on('connect', () => s.emit('player:join', { code, name }, x => r({ s, name, x }))); });
 
 (async () => {
@@ -21,6 +21,7 @@ const mkPlayer = (code, name) => new Promise(r => { const s = io(URL); s.on('con
   host.s.on('host:reveal', d => {
     log(`\n[كشف سؤال ${d.index + 1}] 👑 المتصدّر: ${d.top.name} (${d.top.score})`);
     log('  ⚡ أسرع: ' + (d.fastest.map(f => `${f.rank}.${f.name} ${f.time}ث +${f.points}`).join('  |  ') || '(لا أحد صحيح)'));
+    log('  ✅ الصحيحة: ' + (d.correctText || '?') + (d.explain ? '  💡 ' + d.explain : '  (لا تفسير)'));
     qn++;
     setTimeout(() => host.s.emit('host:next'), 700);
   });

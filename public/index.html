@@ -156,6 +156,9 @@ select.mini{padding:8px 11px}
 .ptop .pt-r .pt-n{flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ptop .pt-r .pt-s{color:var(--gold);font-family:var(--fh)}
 .ptop .pt-r:first-child{background:rgba(201,169,97,.16);border-color:var(--gold)}
+.pexplain{font-family:var(--fb);font-size:14.5px;color:#EAF1F8;background:rgba(201,169,97,.1);border:1px solid var(--line);border-radius:12px;padding:11px 16px;line-height:1.85;max-width:360px;text-align:right}
+.rv-explain{width:100%;max-width:840px;background:linear-gradient(120deg,rgba(201,169,97,.16),rgba(201,169,97,.04));border:1px solid var(--gold);border-radius:14px;padding:13px 20px;margin-bottom:16px;font-family:var(--fb);font-size:16px;line-height:1.85;color:#EAF1F8;text-align:right}
+.rv-explain b{color:#9DE6B4;font-family:var(--fh)}
 .hidden{display:none!important}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--maroon);color:#fff;padding:12px 22px;border-radius:12px;font-family:var(--fh);font-weight:700;z-index:90;display:none}
 .cd{position:fixed;inset:0;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;backdrop-filter:blur(5px);background:radial-gradient(60% 60% at 50% 45%,rgba(20,40,63,.96),rgba(8,16,28,.97))}
@@ -181,7 +184,14 @@ select.mini{padding:8px 11px}
     <h1>أكاديمية <b>القادة</b></h1>
     <p>بطولة المراجعة الحية — مقرر القيادة والريادة والابتكار · الفصول 1–4</p>
     <div class="cards">
-      <button class="bigbtn" onclick="UI.hostStart()">📺 أنا المحاضِرة — ابدئي غرفة جديدة</button>
+      <button class="bigbtn" id="hostBtn" onclick="UI.showHostLogin()">📺 أنا المحاضِرة — تسجيل الدخول</button>
+      <div id="hostLogin" class="hidden" style="display:grid;gap:9px;margin-top:4px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:14px">
+        <div style="color:var(--goldL);font-family:var(--fh);font-size:13.5px">دخول المحاضِرة فقط — للبدء بلعبة</div>
+        <input class="inp" id="hUser" placeholder="اسم المستخدم" autocomplete="username">
+        <input class="inp" id="hPass" type="password" placeholder="كلمة المرور" autocomplete="current-password">
+        <button class="bigbtn" onclick="HOST.login()">دخول وإنشاء غرفة</button>
+        <div class="perr" id="hErr"></div>
+      </div>
       <div style="height:6px"></div>
       <div class="joinrow">
         <input class="inp" id="joinCode" inputmode="numeric" maxlength="4" placeholder="رمز الغرفة">
@@ -212,8 +222,9 @@ select.mini{padding:8px 11px}
   </div>
   <button class="hbtn" id="startBtn" disabled onclick="HOST.start()">🚀 ابدأ اللعبة</button>
   <div class="adminrow">
-    <label>زمن السؤال:</label>
-    <select class="mini" id="timeSel"><option value="10">10 ثوانٍ</option><option value="15" selected>15 ثانية</option><option value="20">20 ثانية</option></select>
+    <label>زمن السؤال (ثانية):</label>
+    <input class="mini" id="timeSel" type="number" min="5" max="180" value="25" style="width:84px;text-align:center;font-family:var(--fh);font-weight:700">
+    <span class="mini" style="cursor:default">يحدّده المحاضِر</span>
     <button class="mini" onclick="document.getElementById('xlsxIn').click()">⬆ استيراد أسئلة (Excel)</button>
     <input type="file" id="xlsxIn" accept=".xlsx" class="hidden" onchange="HOST.importXlsx(event)">
     <span class="mini" id="bankInfo">36 سؤالاً</span>
@@ -233,6 +244,7 @@ select.mini{padding:8px 11px}
 
 <section class="scr" id="h-reveal"><div class="wrap"><div class="hostbox">
   <div class="topbanner"><span class="crown">👑</span><div><b id="rvTopName">—</b><br><span>أعلى نقاط حتى الآن</span></div><span class="sc num" id="rvTopScore" style="color:#fff">0</span></div>
+  <div class="rv-explain hidden" id="rvExplain"></div>
   <div class="lead"><h2>⚡ أسرع ١٠ طلاب</h2><div class="sub" id="rvSub"></div><div id="rvList"></div></div>
   <button class="hbtn" id="rvNext" onclick="HOST.next()">التالي ←</button>
 </div></div></section>
@@ -270,6 +282,7 @@ select.mini{padding:8px 11px}
   <div class="ttl" id="pfTitle"></div>
   <div class="pts hidden" id="pfPts"></div>
   <div class="pcorrect hidden" id="pfCorrect"></div>
+  <div class="pexplain hidden" id="pfExplain"></div>
   <div class="rk hidden" id="pfRank"></div>
   <div class="rk" id="pfScore"></div>
   <div class="ptop hidden" id="pfTop"></div>

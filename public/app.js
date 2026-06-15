@@ -42,8 +42,22 @@ function hideCountdown(){ if(cdGo){ clearInterval(cdGo); cdGo=null; } const cd=$
 
 /* ================= UI entry ================= */
 const UI = {
-  hostStart(){
-    socket.emit('host:create', { timeLimit: 15 }, res => {
+  showHostLogin(){ $('hostLogin').classList.remove('hidden'); const b=$('hostBtn'); if(b) b.classList.add('hidden'); setTimeout(()=>{const u=$('hUser'); if(u) u.focus();},100); },
+  playerGo(){
+    const code=($('joinCode').value||'').trim();
+    if(!/^\d{4}$/.test(code)){ toast('أدخل رمز غرفة من 4 أرقام'); return; }
+    PLAYER.prep(code);
+  }
+};
+
+/* ================= HOST ================= */
+const HOST = {
+  login(){
+    const user=($('hUser').value||'').trim(), password=$('hPass').value||'';
+    if(!user||!password){ $('hErr').style.color='#E7A9A9'; $('hErr').textContent='أدخلي اسم المستخدم وكلمة المرور'; return; }
+    $('hErr').style.color='var(--mute)'; $('hErr').textContent='جارٍ الدخول…';
+    socket.emit('host:create', { user, password }, res => {
+      if(!res || res.error){ $('hErr').style.color='#E7A9A9'; $('hErr').textContent=(res&&res.error)||'تعذّر الدخول'; return; }
       ROLE='host'; ROOM=res.code;
       $('roomCodeBadge').textContent='غرفة '+res.code; $('roomCodeBadge').classList.remove('hidden');
       $('lobbyCode').textContent=res.code;
@@ -54,15 +68,6 @@ const UI = {
       show('h-lobby');
     });
   },
-  playerGo(){
-    const code=($('joinCode').value||'').trim();
-    if(!/^\d{4}$/.test(code)){ toast('أدخل رمز غرفة من 4 أرقام'); return; }
-    PLAYER.prep(code);
-  }
-};
-
-/* ================= HOST ================= */
-const HOST = {
   start(){
     const tl=parseInt($('timeSel').value)||15;
     socket.emit('host:start', { timeLimit: tl, questions: customQuestions || undefined });
@@ -95,8 +100,9 @@ const HOST = {
           const q=(r[2]||'').toString().trim();
           const correct=(r[3]||'').toString().trim();
           const d=[r[4],r[5],r[6]].map(x=>(x||'').toString().trim());
+          const explain=(r[7]||'').toString().trim();
           if(!q||!correct||!d[0]||q.includes('السؤال')||correct.includes('الإجابة الصحيحة')) return;
-          qs.push({chapter:(r[1]||'').toString().trim(), q, opts:[correct,...d], correct:0});
+          qs.push({chapter:(r[1]||'').toString().trim(), q, opts:[correct,...d], correct:0, explain});
         });
         if(qs.length){ customQuestions=qs; $('bankInfo').textContent=qs.length+' سؤالاً (مستورد)'; toast('تم استيراد '+qs.length+' سؤالاً من الملف'); }
         else toast('لم أجد أسئلة بالتنسيق المتوقع في الملف');
@@ -141,6 +147,7 @@ const HOST = {
       $('rvTopName').textContent='المتصدّر: '+d.top.name;
       $('rvTopScore').textContent=d.top.score;
       $('rvSub').textContent=`من الأسرع إلى الأبطأ — بين من أجابوا صحيحاً (سؤال ${d.index+1})`;
+      const rx=$('rvExplain'); if(d.explain||d.correctText){ rx.innerHTML=`<b>✅ ${d.correctText||''}</b>${d.explain?'<br>💡 '+d.explain:''}`; rx.classList.remove('hidden'); } else rx.classList.add('hidden');
       const L=$('rvList'); L.innerHTML='';
       if(!d.fastest.length) L.innerHTML='<div style="color:#9FB2C8;padding:20px">لم تُسجَّل إجابات صحيحة لهذا السؤال.</div>';
       d.fastest.forEach((p,i)=>{ L.insertAdjacentHTML('beforeend',
@@ -196,6 +203,7 @@ const PLAYER = {
     const pts=$('pfPts'), rk=$('pfRank'), cr=$('pfCorrect'), tp=$('pfTop');
     if(d.correct){ pts.textContent='+'+d.points; pts.classList.remove('hidden'); } else pts.classList.add('hidden');
     if(d.correctText){ cr.innerHTML=`الإجابة الصحيحة:<br><b>${d.correctText}</b>`; cr.classList.remove('hidden'); } else cr.classList.add('hidden');
+    const ex=$('pfExplain'); if(d.explain){ ex.innerHTML='💡 '+d.explain; ex.classList.remove('hidden'); } else ex.classList.add('hidden');
     if(d.correct&&d.speedRank){ rk.textContent=`⚡ ترتيب سرعتك: ${d.speedRank} من ${d.correctCount}`; rk.classList.remove('hidden'); } else rk.classList.add('hidden');
     $('pfScore').innerHTML=`رصيدك: <span class="num">${d.score}</span>`;
     if(d.top&&d.top.length){ tp.innerHTML=`<div class="pt-h">المتصدّرون</div>`+d.top.map((p,i)=>`<div class="pt-r"><span>${['🥇','🥈','🥉'][i]||''}</span><span class="pt-n">${p.name}</span><span class="pt-s num">${p.score}</span></div>`).join(''); tp.classList.remove('hidden'); } else tp.classList.add('hidden');

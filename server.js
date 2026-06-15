@@ -16,6 +16,10 @@ let DEFAULT_Q = [];
 try { DEFAULT_Q = JSON.parse(fs.readFileSync(path.join(__dirname, 'questions.json'), 'utf8')); }
 catch (e) { console.warn('questions.json not loaded:', e.message); }
 
+// Admin (lecturer) credentials — override on the host via env vars ADMIN_USER / ADMIN_PASSWORD.
+const ADMIN_USER = (process.env.ADMIN_USER || 'iman').trim().toLowerCase();
+const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'Leaders2026';
+
 const rooms = {};
 const newCode = () => { let c; do { c = String(Math.floor(1000 + Math.random() * 9000)); } while (rooms[c]); return c; };
 
@@ -28,9 +32,14 @@ io.on('connection', sock => {
   let myRoom = null, myRole = null;
 
   sock.on('host:create', (cfg, cb) => {
+    const user = ((cfg && cfg.user) || '').toString().trim().toLowerCase();
+    const pass = ((cfg && cfg.password) || '').toString();
+    if (pass !== ADMIN_PASS || (ADMIN_USER && user !== ADMIN_USER)) {
+      return cb && cb({ error: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
+    }
     const code = newCode();
     const qs = (cfg && Array.isArray(cfg.questions) && cfg.questions.length) ? cfg.questions : DEFAULT_Q;
-    rooms[code] = { code, hostSock: sock.id, players: {}, phase: 'lobby', qIndex: -1, questions: qs, timeLimit: (cfg && cfg.timeLimit) || 15, timer: null, startAt: 0 };
+    rooms[code] = { code, hostSock: sock.id, players: {}, phase: 'lobby', qIndex: -1, questions: qs, timeLimit: (cfg && cfg.timeLimit) || 25, timer: null, startAt: 0 };
     myRoom = code; myRole = 'host'; sock.join(code);
     cb && cb({ code, count: qs.length });
   });
@@ -47,7 +56,7 @@ io.on('connection', sock => {
 
   sock.on('host:start', (cfg) => {
     const r = rooms[myRoom]; if (!r || myRole !== 'host' || r.phase !== 'lobby') return;
-    if (cfg) { if (cfg.timeLimit) r.timeLimit = cfg.timeLimit; if (Array.isArray(cfg.questions) && cfg.questions.length) r.questions = cfg.questions; }
+    if (cfg) { if (cfg.timeLimit) r.timeLimit = Math.max(5, Math.min(180, parseInt(cfg.timeLimit) || 25)); if (Array.isArray(cfg.questions) && cfg.questions.length) r.questions = cfg.questions; }
     r.phase = 'countdown';
     io.to(r.code).emit('game:countdown', { n: 3 });   // synced "get ready" on all devices
     clearTimeout(r.timer);
@@ -96,10 +105,11 @@ function reveal(r) {
   const fastest = correctOnes.slice(0, 10).map((p, i) => ({ rank: i + 1, name: p.name, time: +p.lastTime.toFixed(1), points: p.lastPoints }));
   const leaderboard = [...ps].sort((a, b) => b.score - a.score).slice(0, 10).map(p => ({ name: p.name, score: p.score }));
   const top = leaderboard[0] || { name: '—', score: 0 };
-  io.to(r.hostSock).emit('host:reveal', { correct: r.curCorrect, counts: counts(r), fastest, leaderboard, top, index: r.qIndex, total: r.questions.length, answered: answeredCount(r), totalPlayers: ps.length });
+  const explain = (r.questions[r.qIndex] && r.questions[r.qIndex].explain) || '';
+  io.to(r.hostSock).emit('host:reveal', { correct: r.curCorrect, correctText: r.curOpts[r.curCorrect], explain, counts: counts(r), fastest, leaderboard, top, index: r.qIndex, total: r.questions.length, answered: answeredCount(r), totalPlayers: ps.length });
   ps.forEach(p => {
     const rank = correctOnes.findIndex(x => x.sid === p.sid);
-    io.to(p.sid).emit('player:reveal', { correct: p.lastCorrect, points: p.lastPoints, score: p.score, speedRank: p.lastCorrect ? rank + 1 : null, correctCount: correctOnes.length, correctIndex: r.curCorrect, correctText: r.curOpts[r.curCorrect], top: leaderboard.slice(0, 3) });
+    io.to(p.sid).emit('player:reveal', { correct: p.lastCorrect, points: p.lastPoints, score: p.score, speedRank: p.lastCorrect ? rank + 1 : null, correctCount: correctOnes.length, correctIndex: r.curCorrect, correctText: r.curOpts[r.curCorrect], explain, top: leaderboard.slice(0, 3) });
   });
 }
 
