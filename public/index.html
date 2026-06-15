@@ -148,8 +148,6 @@ select.mini{padding:8px 11px}
 .good{color:#9DE6B4}.bad{color:#E7A9A9}
 .pfeed .pts{font-family:var(--fd);font-weight:900;font-size:42px;color:var(--gold)}
 .pfeed .rk{background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:12px;padding:9px 20px;font-family:var(--fh);font-weight:700;color:#D6E0EC}
-.pcorrect{font-family:var(--fb);font-size:15px;color:#D6E0EC;background:rgba(157,230,180,.12);border:1px solid rgba(157,230,180,.35);border-radius:12px;padding:10px 16px;line-height:1.75;max-width:340px}
-.pcorrect b{color:#9DE6B4;font-family:var(--fh)}
 .ptop{width:100%;max-width:340px;margin-top:4px}
 .ptop .pt-h{font-family:var(--fh);color:var(--goldL);font-size:12px;letter-spacing:1.5px;margin-bottom:6px;text-align:center}
 .ptop .pt-r{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:7px 12px;margin-bottom:5px;font-family:var(--fd);font-weight:700;font-size:14px}
@@ -159,6 +157,22 @@ select.mini{padding:8px 11px}
 .pexplain{font-family:var(--fb);font-size:14.5px;color:#EAF1F8;background:rgba(201,169,97,.1);border:1px solid var(--line);border-radius:12px;padding:11px 16px;line-height:1.85;max-width:360px;text-align:right}
 .rv-explain{width:100%;max-width:840px;background:linear-gradient(120deg,rgba(201,169,97,.16),rgba(201,169,97,.04));border:1px solid var(--gold);border-radius:14px;padding:13px 20px;margin-bottom:16px;font-family:var(--fb);font-size:16px;line-height:1.85;color:#EAF1F8;text-align:right}
 .rv-explain b{color:#9DE6B4;font-family:var(--fh)}
+.extendbtn{background:rgba(201,169,97,.16);border:1.5px solid var(--gold);color:var(--goldL);border-radius:12px;padding:9px 15px;font-family:var(--fh);font-weight:800;font-size:14px;transition:.18s;flex:none;white-space:nowrap}
+.extendbtn:hover{background:linear-gradient(135deg,var(--goldB),var(--gold));color:var(--deep);transform:translateY(-2px);box-shadow:0 8px 20px rgba(201,169,97,.4)}
+.extendbtn:active{transform:scale(.96)}
+.rv-anslabel{font-family:var(--fh);color:var(--goldL);font-size:13px;letter-spacing:1.5px;margin-bottom:11px;align-self:flex-start}
+.ans-recap{width:100%;max-width:840px;display:grid;gap:9px;margin-bottom:16px}
+.ans-opt{display:flex;align-items:center;gap:13px;border-radius:13px;padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);opacity:.4;filter:grayscale(.5) brightness(.88);transition:.35s}
+.ans-opt .ao-shape{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:19px;flex:none}
+.ans-opt .ao-text{flex:1;text-align:right;font-family:var(--fd);font-weight:700;font-size:16.5px;color:#fff;line-height:1.45}
+.ans-opt .ao-tag{font-family:var(--fh);font-weight:700;font-size:12.5px;border-radius:999px;padding:4px 12px;white-space:nowrap;flex:none}
+.ans-opt .ao-tag.ok{background:#9DE6B4;color:#0C1A2E}
+.ans-opt .ao-tag.no{background:rgba(231,169,169,.95);color:#3A0A0A}
+.ans-opt .ao-tag.muted{background:rgba(0,0,0,.32);color:var(--mute);font-family:var(--fd);font-weight:900}
+.ans-opt.correct{opacity:1;filter:none;background:rgba(157,230,180,.13);border-color:#9DE6B4;box-shadow:0 8px 24px rgba(63,122,82,.28)}
+.ans-opt.correct .ao-shape{background:#3f7a52;color:#fff}
+.ans-opt.mine{outline:2px dashed var(--gold);outline-offset:2px}
+.ans-opt.wrong.mine{opacity:.95;filter:none}
 .hidden{display:none!important}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--maroon);color:#fff;padding:12px 22px;border-radius:12px;font-family:var(--fh);font-weight:700;z-index:90;display:none}
 .cd{position:fixed;inset:0;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;backdrop-filter:blur(5px);background:radial-gradient(60% 60% at 50% 45%,rgba(20,40,63,.96),rgba(8,16,28,.97))}
@@ -236,6 +250,7 @@ select.mini{padding:8px 11px}
     <span class="qcount" id="hqCount"></span>
     <span class="qchap" id="hqChap"></span>
     <span class="answered" id="hqAns"></span>
+    <button class="extendbtn" onclick="HOST.extend()" title="إضافة ١٠ ثوانٍ لكل الطلاب">+١٠ ثوانٍ ⏱️</button>
     <div class="timer"><svg width="84" height="84"><circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="7"/><circle id="hring" cx="42" cy="42" r="36" fill="none" stroke="#C9A961" stroke-width="7" stroke-linecap="round" stroke-dasharray="226"/></svg><div class="tn num" id="htnum"></div></div>
   </div>
   <div class="qtext" id="hqText"></div>
@@ -243,8 +258,10 @@ select.mini{padding:8px 11px}
 </div></div></section>
 
 <section class="scr" id="h-reveal"><div class="wrap"><div class="hostbox">
-  <div class="topbanner"><span class="crown">👑</span><div><b id="rvTopName">—</b><br><span>أعلى نقاط حتى الآن</span></div><span class="sc num" id="rvTopScore" style="color:#fff">0</span></div>
+  <div class="rv-anslabel">الإجابة الصحيحة · والخيارات الخاطئة معتمة</div>
+  <div class="ans-recap" id="rvOptions"></div>
   <div class="rv-explain hidden" id="rvExplain"></div>
+  <div class="topbanner"><span class="crown">👑</span><div><b id="rvTopName">—</b><br><span>أعلى نقاط حتى الآن</span></div><span class="sc num" id="rvTopScore" style="color:#fff">0</span></div>
   <div class="lead"><h2>⚡ أسرع ١٠ طلاب</h2><div class="sub" id="rvSub"></div><div id="rvList"></div></div>
   <button class="hbtn" id="rvNext" onclick="HOST.next()">التالي ←</button>
 </div></div></section>
@@ -281,7 +298,7 @@ select.mini{padding:8px 11px}
   <div class="ic" id="pfIcon"></div>
   <div class="ttl" id="pfTitle"></div>
   <div class="pts hidden" id="pfPts"></div>
-  <div class="pcorrect hidden" id="pfCorrect"></div>
+  <div class="ans-recap" id="pfOptions"></div>
   <div class="pexplain hidden" id="pfExplain"></div>
   <div class="rk hidden" id="pfRank"></div>
   <div class="rk" id="pfScore"></div>

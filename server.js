@@ -64,6 +64,17 @@ io.on('connection', sock => {
   });
   sock.on('host:next', () => { const r = rooms[myRoom]; if (r && myRole === 'host') startQ(r, r.qIndex + 1); });
 
+  // lecturer adds time mid-question (default +10s); server reschedules reveal + syncs all devices
+  sock.on('host:extend', (cfg) => {
+    const r = rooms[myRoom]; if (!r || myRole !== 'host' || r.phase !== 'question') return;
+    const add = Math.max(1, Math.min(120, parseInt(cfg && cfg.secs) || 10));
+    r.timeLimit += add;
+    clearTimeout(r.timer);
+    const fireIn = Math.max(400, (r.startAt + r.timeLimit * 1000 + 500) - Date.now());
+    r.timer = setTimeout(() => reveal(r), fireIn);
+    io.to(r.code).emit('q:extend', { add, timeLimit: r.timeLimit });
+  });
+
   sock.on('player:answer', ({ choice }) => {
     const r = rooms[myRoom]; if (!r || r.phase !== 'question') return;
     const p = r.players[sock.id]; if (!p || p.answered) return;

@@ -8,21 +8,33 @@ function toast(msg){ const t=$('toast'); t.textContent=msg; t.style.display='blo
 
 let ROLE=null, ROOM=null, customQuestions=null, finalStandings=null, cdTimer=null;
 
-/* ---------- timer (cosmetic; server is authoritative) ---------- */
-function startCountdown(limit){
-  stopCountdown();
-  const t0=Date.now();
+/* ---------- timer (cosmetic; server is authoritative; extendable by lecturer) ---------- */
+let cdT0=0, cdLimit=0;
+function cdTick(){
   const ring=$('hring'), tn=$('htnum'), bar=$('pbar');
-  const draw=()=>{
-    const elapsed=(Date.now()-t0)/1000, rem=Math.max(0,limit-elapsed), frac=rem/limit;
-    if(tn) tn.textContent=Math.ceil(rem);
-    if(ring){ ring.style.strokeDashoffset=String(226*(1-frac)); ring.style.stroke = frac<.25?'#E39A9A':(frac<.5?'#D8BC78':'#C9A961'); }
-    if(bar) bar.style.width=(frac*100)+'%';
-    if(rem<=0) stopCountdown();
-  };
-  draw(); cdTimer=setInterval(draw,100);
+  const elapsed=(Date.now()-cdT0)/1000, rem=Math.max(0,cdLimit-elapsed), frac=cdLimit>0?rem/cdLimit:0;
+  if(tn) tn.textContent=Math.ceil(rem);
+  if(ring){ ring.style.strokeDashoffset=String(226*(1-frac)); ring.style.stroke = frac<.25?'#E39A9A':(frac<.5?'#D8BC78':'#C9A961'); }
+  if(bar) bar.style.width=(frac*100)+'%';
+  if(rem<=0) stopCountdown();
 }
+function startCountdown(limit){ stopCountdown(); cdT0=Date.now(); cdLimit=limit; cdTick(); cdTimer=setInterval(cdTick,100); }
 function stopCountdown(){ if(cdTimer){ clearInterval(cdTimer); cdTimer=null; } }
+function extendCountdown(add){ if(!add) return; cdLimit+=add; if(!cdTimer) cdTimer=setInterval(cdTick,100); cdTick(); }
+
+/* shared answer recap: dims the wrong options, highlights the correct one, marks the student's pick */
+function renderRecap(el, opts, correctIdx, myChoice, counts){
+  if(!el) return; el.innerHTML='';
+  (opts||[]).forEach((o,i)=>{
+    const isC=(i===correctIdx), mine=(myChoice!=null && i===myChoice);
+    let tag='';
+    if(isC) tag=`<span class="ao-tag ok">✓ الإجابة الصحيحة${mine?' · اختيارك':''}${counts?' · '+(counts[i]||0):''}</span>`;
+    else if(mine) tag=`<span class="ao-tag no">✗ اختيارك</span>`;
+    else if(counts) tag=`<span class="ao-tag muted">${counts[i]||0}</span>`;
+    el.insertAdjacentHTML('beforeend',
+      `<div class="ans-opt ${isC?'correct':'wrong'}${mine?' mine':''}"><span class="ao-shape">${SHAPES[i]}</span><span class="ao-text">${o}</span>${tag}</div>`);
+  });
+}
 
 /* ---- pre-game "get ready" countdown (synced on all devices) ---- */
 let cdGo=null;
@@ -73,6 +85,7 @@ const HOST = {
     socket.emit('host:start', { timeLimit: tl, questions: customQuestions || undefined });
   },
   next(){ socket.emit('host:next'); },
+  extend(){ socket.emit('host:extend', { secs: 10 }); },
   setPubUrl(){
     let base=($('pubUrl').value||'').trim().replace(/\/+$/,''); if(!base) return;
     if(!/^https?:\/\//.test(base)) base='https://'+base;
@@ -128,7 +141,7 @@ const HOST = {
     $('hqCount').textContent=`سؤال ${p.index+1} / ${p.total}`;
     $('hqChap').textContent=p.chapter||'';
     $('hqAns').innerHTML=`أجاب: <span class="num">0</span> / <span class="num">0</span>`;
-    $('hqText').textContent=p.q;
+    $('hqText').textContent=p.q; this._opts=p.opts;
     const box=$('hTiles'); box.className='tiles'; box.innerHTML='';
     p.opts.forEach((o,i)=>{ box.insertAdjacentHTML('beforeend',
       `<div class="tile t${i}" data-i="${i}"><span class="shape">${SHAPES[i]}</span><span>${o}</span><span class="cnt num">0</span></div>`); });
@@ -147,7 +160,8 @@ const HOST = {
       $('rvTopName').textContent='المتصدّر: '+d.top.name;
       $('rvTopScore').textContent=d.top.score;
       $('rvSub').textContent=`من الأسرع إلى الأبطأ — بين من أجابوا صحيحاً (سؤال ${d.index+1})`;
-      const rx=$('rvExplain'); if(d.explain||d.correctText){ rx.innerHTML=`<b>✅ ${d.correctText||''}</b>${d.explain?'<br>💡 '+d.explain:''}`; rx.classList.remove('hidden'); } else rx.classList.add('hidden');
+      renderRecap($('rvOptions'), this._opts, d.correct, null, counts);
+      const rx=$('rvExplain'); if(d.explain){ rx.innerHTML='<b>💡 لماذا؟</b> '+d.explain; rx.classList.remove('hidden'); } else rx.classList.add('hidden');
       const L=$('rvList'); L.innerHTML='';
       if(!d.fastest.length) L.innerHTML='<div style="color:#9FB2C8;padding:20px">لم تُسجَّل إجابات صحيحة لهذا السؤال.</div>';
       d.fastest.forEach((p,i)=>{ L.insertAdjacentHTML('beforeend',
@@ -186,11 +200,11 @@ const PLAYER = {
     const box=$('pBtns'); box.innerHTML='';
     p.opts.forEach((o,i)=>{ const b=document.createElement('button'); b.className='pchoice t'+i;
       b.innerHTML=`<span class="ps">${SHAPES[i]}</span><span>${o}</span>`; b.onclick=()=>PLAYER.answer(i,b); box.appendChild(b); });
-    this.answered=false;
+    this.answered=false; this.curOpts=p.opts; this.myChoice=null;
     show('p-question'); startCountdown(p.timeLimit);
   },
   answer(i,btn){
-    if(this.answered) return; this.answered=true;
+    if(this.answered) return; this.answered=true; this.myChoice=i;
     socket.emit('player:answer',{choice:i});
     document.querySelectorAll('#pBtns .pchoice').forEach((b,bi)=>{ if(bi!==i) b.classList.add('dim'); b.disabled=true; });
   },
@@ -200,10 +214,10 @@ const PLAYER = {
     $('pfIcon').textContent=d.correct?'✅':'❌';
     $('pfTitle').textContent=d.correct?'إجابة صحيحة!':'إجابة غير صحيحة';
     $('pfTitle').className='ttl '+(d.correct?'good':'bad');
-    const pts=$('pfPts'), rk=$('pfRank'), cr=$('pfCorrect'), tp=$('pfTop');
+    const pts=$('pfPts'), rk=$('pfRank'), tp=$('pfTop');
     if(d.correct){ pts.textContent='+'+d.points; pts.classList.remove('hidden'); } else pts.classList.add('hidden');
-    if(d.correctText){ cr.innerHTML=`الإجابة الصحيحة:<br><b>${d.correctText}</b>`; cr.classList.remove('hidden'); } else cr.classList.add('hidden');
-    const ex=$('pfExplain'); if(d.explain){ ex.innerHTML='💡 '+d.explain; ex.classList.remove('hidden'); } else ex.classList.add('hidden');
+    renderRecap($('pfOptions'), this.curOpts, d.correctIndex, this.myChoice, null);
+    const ex=$('pfExplain'); if(d.explain){ ex.innerHTML='<b>💡 لماذا؟</b> '+d.explain; ex.classList.remove('hidden'); } else ex.classList.add('hidden');
     if(d.correct&&d.speedRank){ rk.textContent=`⚡ ترتيب سرعتك: ${d.speedRank} من ${d.correctCount}`; rk.classList.remove('hidden'); } else rk.classList.add('hidden');
     $('pfScore').innerHTML=`رصيدك: <span class="num">${d.score}</span>`;
     if(d.top&&d.top.length){ tp.innerHTML=`<div class="pt-h">المتصدّرون</div>`+d.top.map((p,i)=>`<div class="pt-r"><span>${['🥇','🥈','🥉'][i]||''}</span><span class="pt-n">${p.name}</span><span class="pt-s num">${p.score}</span></div>`).join(''); tp.classList.remove('hidden'); } else tp.classList.add('hidden');
@@ -224,6 +238,7 @@ socket.on('host:progress', d=>{ if(ROLE==='host') HOST.progress(d); });
 socket.on('host:reveal', d=>{ if(ROLE==='host') HOST.reveal(d); });
 socket.on('host:over', d=>{ if(ROLE==='host') HOST.over(d); });
 socket.on('game:countdown', d=>showCountdown(d.n||3));
+socket.on('q:extend', d=>{ extendCountdown(d.add); toast(`⏱️ أُضيفت ${d.add} ثوانٍ — أجيبوا الآن`); });
 socket.on('q:show', p=>{ hideCountdown(); if(ROLE==='host') HOST.question(p); else if(ROLE==='player') PLAYER.question(p); });
 socket.on('player:ack', d=>PLAYER.ack(d));
 socket.on('player:reveal', d=>PLAYER.reveal(d));
