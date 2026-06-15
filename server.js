@@ -1,4 +1,4 @@
-// أكاديمية القادة — النسخة الحية | خادم اللعب الجماعي الحي
+// جامعة لوسيل - القيادة — النسخة الحية | خادم اللعب الجماعي الحي
 // Authoritative real-time server: rooms, server-side timing, fastest-N, scoring.
 const express = require('express');
 const http = require('http');
@@ -121,4 +121,4 @@ function gameOver(r) {
 }
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log('أكاديمية القادة — النسخة الحية تعمل على المنفذ ' + PORT));
+server.listen(PORT, () => console.log('جامعة لوسيل - القيادة — النسخة الحية تعمل على المنفذ ' + PORT));

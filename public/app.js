@@ -1,4 +1,4 @@
-/* أكاديمية القادة — النسخة الحية | عميل المحاضِر + الطالب */
+/* جامعة لوسيل - القيادة — النسخة الحية | عميل المحاضِر + الطالب */
 const socket = io();
 const SHAPES = ['▲', '◆', '●', '■'];
 const $ = id => document.getElementById(id);
@@ -115,7 +115,7 @@ const HOST = {
     const aoa=[['الترتيب','اسم الطالب','النقاط']].concat(finalStandings.map(p=>[p.rank,p.name,p.score]));
     const ws=XLSX.utils.aoa_to_sheet(aoa); ws['!cols']=[{wch:8},{wch:28},{wch:12}];
     const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'النتائج');
-    XLSX.writeFile(wb,'نتائج أكاديمية القادة.xlsx');
+    XLSX.writeFile(wb,'نتائج جامعة لوسيل - القيادة.xlsx');
   },
   lobby(d){
     $('joinCount').textContent=d.count;

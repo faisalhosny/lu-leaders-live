@@ -1,7 +1,7 @@
 {
   "name": "lu-leaders-live",
   "version": "1.0.0",
-  "description": "أكاديمية القادة — النسخة الحية (Live multiplayer) | جامعة لوسيل | إعداد: إيمان الحصني",
+  "description": "جامعة لوسيل - القيادة — النسخة الحية (Live multiplayer) | إعداد: إيمان الحصني",
   "main": "server.js",
   "engines": { "node": ">=18" },
   "scripts": { "start": "node server.js", "test": "node test_client.js" },

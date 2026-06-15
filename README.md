@@ -1,4 +1,4 @@
-# أكاديمية القادة — النسخة الحية (LU Leaders Live)
+# جامعة لوسيل - القيادة — النسخة الحية (LU Leaders Live)
 
 Live multiplayer review game (Kahoot-style) for **مقرر القيادة والريادة والابتكار** — Lusail University.
 Prepared by **إيمان الحصني**. Real-time engine: Node.js + Socket.IO.
