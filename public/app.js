@@ -81,11 +81,13 @@ const HOST = {
     });
   },
   start(){
-    const tl=parseInt($('timeSel').value)||15;
-    socket.emit('host:start', { timeLimit: tl, questions: customQuestions || undefined });
+    const tl=parseInt($('timeSel').value)||25;
+    const manual=!!($('manualToggle') && $('manualToggle').checked);
+    socket.emit('host:start', { timeLimit: tl, manual, questions: customQuestions || undefined });
   },
   next(){ socket.emit('host:next'); },
   extend(){ socket.emit('host:extend', { secs: 10 }); },
+  revealNow(){ socket.emit('host:revealNow'); },
   setPubUrl(){
     let base=($('pubUrl').value||'').trim().replace(/\/+$/,''); if(!base) return;
     if(!/^https?:\/\//.test(base)) base='https://'+base;
@@ -141,14 +143,28 @@ const HOST = {
     $('hqCount').textContent=`سؤال ${p.index+1} / ${p.total}`;
     $('hqChap').textContent=p.chapter||'';
     $('hqAns').innerHTML=`أجاب: <span class="num">0</span> / <span class="num">0</span>`;
-    $('hqText').textContent=p.q; this._opts=p.opts;
+    $('hqText').textContent=p.q; this._opts=p.opts; this._manual=!!p.manual;
     const box=$('hTiles'); box.className='tiles'; box.innerHTML='';
     p.opts.forEach((o,i)=>{ box.insertAdjacentHTML('beforeend',
       `<div class="tile t${i}" data-i="${i}"><span class="shape">${SHAPES[i]}</span><span>${o}</span><span class="cnt num">0</span></div>`); });
-    $('htnum').textContent=p.timeLimit;
-    show('h-question'); startCountdown(p.timeLimit);
+    const tw=$('hTimerWrap'), eb=$('hExtendBtn'), rb=$('hRevealBtn');
+    if(p.manual){
+      if(tw) tw.classList.add('hidden'); if(eb) eb.classList.add('hidden');
+      stopCountdown();
+      if(rb){ rb.classList.remove('hidden','ready'); rb.textContent='اكشف الإجابة (0/0)'; }
+      show('h-question');
+    } else {
+      if(tw) tw.classList.remove('hidden'); if(eb) eb.classList.remove('hidden');
+      if(rb) rb.classList.add('hidden');
+      $('htnum').textContent=p.timeLimit;
+      show('h-question'); startCountdown(p.timeLimit);
+    }
   },
-  progress(d){ $('hqAns').innerHTML=`أجاب: <span class="num">${d.answered}</span> / <span class="num">${d.total}</span>`; this._counts=d.counts; },
+  progress(d){
+    $('hqAns').innerHTML=`أجاب: <span class="num">${d.answered}</span> / <span class="num">${d.total}</span>`; this._counts=d.counts;
+    if(this._manual){ const rb=$('hRevealBtn'), all=d.total>0 && d.answered>=d.total;
+      if(rb){ rb.classList.toggle('ready', all); rb.textContent = all ? `✅ أجاب الجميع (${d.answered}/${d.total}) — اكشف الإجابة` : `اكشف الإجابة (${d.answered}/${d.total})`; } }
+  },
   reveal(d){
     stopCountdown();
     // highlight on the question board first
@@ -159,7 +175,8 @@ const HOST = {
     setTimeout(()=>{
       $('rvTopName').textContent='المتصدّر: '+d.top.name;
       $('rvTopScore').textContent=d.top.score;
-      $('rvSub').textContent=`من الأسرع إلى الأبطأ — بين من أجابوا صحيحاً (سؤال ${d.index+1})`;
+      if(d.manual){ $('rvLeadH').textContent='✅ الطلاب الذين أجابوا صحيحاً'; $('rvSub').textContent=`بترتيب الإجابة · النقاط متساوية في النمط اليدوي (سؤال ${d.index+1})`; }
+      else { $('rvLeadH').textContent='⚡ أسرع ١٠ طلاب'; $('rvSub').textContent=`من الأسرع إلى الأبطأ — بين من أجابوا صحيحاً (سؤال ${d.index+1})`; }
       renderRecap($('rvOptions'), this._opts, d.correct, null, counts);
       const rx=$('rvExplain'); if(d.explain){ rx.innerHTML='<b>💡 لماذا؟</b> '+d.explain; rx.classList.remove('hidden'); } else rx.classList.add('hidden');
       const L=$('rvList'); L.innerHTML='';
@@ -201,7 +218,10 @@ const PLAYER = {
     p.opts.forEach((o,i)=>{ const b=document.createElement('button'); b.className='pchoice t'+i;
       b.innerHTML=`<span class="ps">${SHAPES[i]}</span><span>${o}</span>`; b.onclick=()=>PLAYER.answer(i,b); box.appendChild(b); });
     this.answered=false; this.curOpts=p.opts; this.myChoice=null;
-    show('p-question'); startCountdown(p.timeLimit);
+    const bar=$('ptbar'), hint=$('pHint');
+    if(p.manual){ if(bar) bar.classList.add('hidden'); if(hint) hint.classList.remove('hidden'); stopCountdown(); }
+    else { if(bar) bar.classList.remove('hidden'); if(hint) hint.classList.add('hidden'); }
+    show('p-question'); if(!p.manual) startCountdown(p.timeLimit);
   },
   answer(i,btn){
     if(this.answered) return; this.answered=true; this.myChoice=i;
@@ -218,7 +238,7 @@ const PLAYER = {
     if(d.correct){ pts.textContent='+'+d.points; pts.classList.remove('hidden'); } else pts.classList.add('hidden');
     renderRecap($('pfOptions'), this.curOpts, d.correctIndex, this.myChoice, null);
     const ex=$('pfExplain'); if(d.explain){ ex.innerHTML='<b>💡 لماذا؟</b> '+d.explain; ex.classList.remove('hidden'); } else ex.classList.add('hidden');
-    if(d.correct&&d.speedRank){ rk.textContent=`⚡ ترتيب سرعتك: ${d.speedRank} من ${d.correctCount}`; rk.classList.remove('hidden'); } else rk.classList.add('hidden');
+    if(!d.manual && d.correct && d.speedRank){ rk.textContent=`⚡ ترتيب سرعتك: ${d.speedRank} من ${d.correctCount}`; rk.classList.remove('hidden'); } else rk.classList.add('hidden');
     $('pfScore').innerHTML=`رصيدك: <span class="num">${d.score}</span>`;
     if(d.top&&d.top.length){ tp.innerHTML=`<div class="pt-h">المتصدّرون</div>`+d.top.map((p,i)=>`<div class="pt-r"><span>${['🥇','🥈','🥉'][i]||''}</span><span class="pt-n">${p.name}</span><span class="pt-s num">${p.score}</span></div>`).join(''); tp.classList.remove('hidden'); } else tp.classList.add('hidden');
     show('p-reveal');

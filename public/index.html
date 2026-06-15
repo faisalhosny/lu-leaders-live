@@ -160,6 +160,11 @@ select.mini{padding:8px 11px}
 .extendbtn{background:rgba(201,169,97,.16);border:1.5px solid var(--gold);color:var(--goldL);border-radius:12px;padding:9px 15px;font-family:var(--fh);font-weight:800;font-size:14px;transition:.18s;flex:none;white-space:nowrap}
 .extendbtn:hover{background:linear-gradient(135deg,var(--goldB),var(--gold));color:var(--deep);transform:translateY(-2px);box-shadow:0 8px 20px rgba(201,169,97,.4)}
 .extendbtn:active{transform:scale(.96)}
+.modetoggle{display:inline-flex;align-items:center;gap:7px;background:rgba(201,169,97,.1);border:1px solid var(--line);color:var(--goldL);border-radius:11px;padding:8px 14px;font-family:var(--fh);font-weight:700;font-size:13px;cursor:pointer}
+.modetoggle input{width:17px;height:17px;accent-color:var(--gold);cursor:pointer}
+.phint{font-family:var(--fh);color:var(--goldL);background:rgba(201,169,97,.12);border:1px solid var(--line);border-radius:12px;padding:11px 16px;font-size:14.5px;text-align:center;margin-bottom:14px;line-height:1.7}
+#hRevealBtn.ready{animation:revpulse 1.1s ease-in-out infinite;background:linear-gradient(135deg,#9DE6B4,#3f7a52);color:#08221A}
+@keyframes revpulse{0%,100%{box-shadow:0 10px 28px rgba(63,122,82,.4)}50%{box-shadow:0 12px 44px rgba(157,230,180,.7);transform:translateY(-2px)}}
 .rv-anslabel{font-family:var(--fh);color:var(--goldL);font-size:13px;letter-spacing:1.5px;margin-bottom:11px;align-self:flex-start}
 .ans-recap{width:100%;max-width:840px;display:grid;gap:9px;margin-bottom:16px}
 .ans-opt{display:flex;align-items:center;gap:13px;border-radius:13px;padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);opacity:.4;filter:grayscale(.5) brightness(.88);transition:.35s}
@@ -239,6 +244,7 @@ select.mini{padding:8px 11px}
     <label>زمن السؤال (ثانية):</label>
     <input class="mini" id="timeSel" type="number" min="5" max="180" value="25" style="width:84px;text-align:center;font-family:var(--fh);font-weight:700">
     <span class="mini" style="cursor:default">يحدّده المحاضِر</span>
+    <label class="modetoggle" title="بدون مؤقّت: يجيب الطلاب على راحتهم وتكشفين الإجابة بنفسك"><input type="checkbox" id="manualToggle"> ✋ كشف يدوي (بدون مؤقّت)</label>
     <button class="mini" onclick="document.getElementById('xlsxIn').click()">⬆ استيراد أسئلة (Excel)</button>
     <input type="file" id="xlsxIn" accept=".xlsx" class="hidden" onchange="HOST.importXlsx(event)">
     <span class="mini" id="bankInfo">36 سؤالاً</span>
@@ -250,11 +256,12 @@ select.mini{padding:8px 11px}
     <span class="qcount" id="hqCount"></span>
     <span class="qchap" id="hqChap"></span>
     <span class="answered" id="hqAns"></span>
-    <button class="extendbtn" onclick="HOST.extend()" title="إضافة ١٠ ثوانٍ لكل الطلاب">+١٠ ثوانٍ ⏱️</button>
-    <div class="timer"><svg width="84" height="84"><circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="7"/><circle id="hring" cx="42" cy="42" r="36" fill="none" stroke="#C9A961" stroke-width="7" stroke-linecap="round" stroke-dasharray="226"/></svg><div class="tn num" id="htnum"></div></div>
+    <button class="extendbtn" id="hExtendBtn" onclick="HOST.extend()" title="إضافة ١٠ ثوانٍ لكل الطلاب">+١٠ ثوانٍ ⏱️</button>
+    <div class="timer" id="hTimerWrap"><svg width="84" height="84"><circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="7"/><circle id="hring" cx="42" cy="42" r="36" fill="none" stroke="#C9A961" stroke-width="7" stroke-linecap="round" stroke-dasharray="226"/></svg><div class="tn num" id="htnum"></div></div>
   </div>
   <div class="qtext" id="hqText"></div>
   <div class="tiles" id="hTiles"></div>
+  <button class="hbtn hidden" id="hRevealBtn" onclick="HOST.revealNow()" style="margin-top:24px">اكشف الإجابة ✋</button>
 </div></div></section>
 
 <section class="scr" id="h-reveal"><div class="wrap"><div class="hostbox">
@@ -262,7 +269,7 @@ select.mini{padding:8px 11px}
   <div class="ans-recap" id="rvOptions"></div>
   <div class="rv-explain hidden" id="rvExplain"></div>
   <div class="topbanner"><span class="crown">👑</span><div><b id="rvTopName">—</b><br><span>أعلى نقاط حتى الآن</span></div><span class="sc num" id="rvTopScore" style="color:#fff">0</span></div>
-  <div class="lead"><h2>⚡ أسرع ١٠ طلاب</h2><div class="sub" id="rvSub"></div><div id="rvList"></div></div>
+  <div class="lead"><h2 id="rvLeadH">⚡ أسرع ١٠ طلاب</h2><div class="sub" id="rvSub"></div><div id="rvList"></div></div>
   <button class="hbtn" id="rvNext" onclick="HOST.next()">التالي ←</button>
 </div></div></section>
 
@@ -289,7 +296,8 @@ select.mini{padding:8px 11px}
 </div></div></section>
 
 <section class="scr" id="p-question"><div class="pwrap">
-  <div class="ptimerbar"><i id="pbar"></i></div>
+  <div class="ptimerbar" id="ptbar"><i id="pbar"></i></div>
+  <div class="phint hidden" id="pHint">✋ أجِب على راحتك — ستكشف المحاضِرة الإجابة للجميع. لا تتعجّل.</div>
   <div class="pq" id="pqText"></div>
   <div class="pbtns" id="pBtns"></div>
 </div></section>

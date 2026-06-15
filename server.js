@@ -39,7 +39,7 @@ io.on('connection', sock => {
     }
     const code = newCode();
     const qs = (cfg && Array.isArray(cfg.questions) && cfg.questions.length) ? cfg.questions : DEFAULT_Q;
-    rooms[code] = { code, hostSock: sock.id, players: {}, phase: 'lobby', qIndex: -1, questions: qs, timeLimit: (cfg && cfg.timeLimit) || 25, timer: null, startAt: 0 };
+    rooms[code] = { code, hostSock: sock.id, players: {}, phase: 'lobby', qIndex: -1, questions: qs, timeLimit: (cfg && cfg.timeLimit) || 25, manual: false, timer: null, startAt: 0 };
     myRoom = code; myRole = 'host'; sock.join(code);
     cb && cb({ code, count: qs.length });
   });
@@ -56,13 +56,19 @@ io.on('connection', sock => {
 
   sock.on('host:start', (cfg) => {
     const r = rooms[myRoom]; if (!r || myRole !== 'host' || r.phase !== 'lobby') return;
-    if (cfg) { if (cfg.timeLimit) r.timeLimit = Math.max(5, Math.min(180, parseInt(cfg.timeLimit) || 25)); if (Array.isArray(cfg.questions) && cfg.questions.length) r.questions = cfg.questions; }
+    if (cfg) { if (cfg.timeLimit) r.timeLimit = Math.max(5, Math.min(180, parseInt(cfg.timeLimit) || 25)); if (typeof cfg.manual === 'boolean') r.manual = cfg.manual; if (Array.isArray(cfg.questions) && cfg.questions.length) r.questions = cfg.questions; }
     r.phase = 'countdown';
     io.to(r.code).emit('game:countdown', { n: 3 });   // synced "get ready" on all devices
     clearTimeout(r.timer);
     r.timer = setTimeout(() => startQ(r, 0), 3300);
   });
   sock.on('host:next', () => { const r = rooms[myRoom]; if (r && myRole === 'host') startQ(r, r.qIndex + 1); });
+
+  // manual reveal: lecturer decides when to show the answer (no auto-timer in manual mode)
+  sock.on('host:revealNow', () => {
+    const r = rooms[myRoom]; if (!r || myRole !== 'host' || r.phase !== 'question') return;
+    clearTimeout(r.timer); reveal(r);
+  });
 
   // lecturer adds time mid-question (default +10s); server reschedules reveal + syncs all devices
   sock.on('host:extend', (cfg) => {
@@ -81,11 +87,11 @@ io.on('connection', sock => {
     const t = (Date.now() - r.startAt) / 1000;
     const correct = (choice === r.curCorrect);
     p.answered = true; p.lastTime = t; p.lastCorrect = correct; p.lastChoice = choice;
-    p.lastPoints = correct ? (600 + Math.round(400 * Math.max(0, 1 - t / r.timeLimit))) : 0;
+    p.lastPoints = correct ? (r.manual ? 1000 : (600 + Math.round(400 * Math.max(0, 1 - t / r.timeLimit)))) : 0;
     p.score += p.lastPoints;
-    sock.emit('player:ack', { t: +t.toFixed(1) });
+    sock.emit('player:ack', { t: +t.toFixed(1), manual: !!r.manual });
     io.to(r.hostSock).emit('host:progress', { answered: answeredCount(r), total: Object.keys(r.players).length, counts: counts(r) });
-    if (allAnswered(r)) { clearTimeout(r.timer); reveal(r); }
+    if (!r.manual && allAnswered(r)) { clearTimeout(r.timer); reveal(r); }
   });
 
   sock.on('disconnect', () => {
@@ -103,10 +109,10 @@ function startQ(r, idx) {
   const order = q.opts.map((_, i) => i).sort(() => Math.random() - 0.5);
   r.curOpts = order.map(i => q.opts[i]);
   r.curCorrect = order.indexOf(typeof q.correct === 'number' ? q.correct : 0);
-  io.to(r.code).emit('q:show', { index: idx, total: r.questions.length, chapter: q.chapter || '', q: q.q, opts: r.curOpts, timeLimit: r.timeLimit });
+  io.to(r.code).emit('q:show', { index: idx, total: r.questions.length, chapter: q.chapter || '', q: q.q, opts: r.curOpts, timeLimit: r.timeLimit, manual: !!r.manual });
   io.to(r.hostSock).emit('host:progress', { answered: 0, total: Object.keys(r.players).length, counts: [0, 0, 0, 0] });
   clearTimeout(r.timer);
-  r.timer = setTimeout(() => reveal(r), r.timeLimit * 1000 + 500);
+  if (!r.manual) r.timer = setTimeout(() => reveal(r), r.timeLimit * 1000 + 500);
 }
 
 function reveal(r) {
@@ -117,10 +123,10 @@ function reveal(r) {
   const leaderboard = [...ps].sort((a, b) => b.score - a.score).slice(0, 10).map(p => ({ name: p.name, score: p.score }));
   const top = leaderboard[0] || { name: '—', score: 0 };
   const explain = (r.questions[r.qIndex] && r.questions[r.qIndex].explain) || '';
-  io.to(r.hostSock).emit('host:reveal', { correct: r.curCorrect, correctText: r.curOpts[r.curCorrect], explain, counts: counts(r), fastest, leaderboard, top, index: r.qIndex, total: r.questions.length, answered: answeredCount(r), totalPlayers: ps.length });
+  io.to(r.hostSock).emit('host:reveal', { correct: r.curCorrect, correctText: r.curOpts[r.curCorrect], explain, counts: counts(r), fastest, leaderboard, top, index: r.qIndex, total: r.questions.length, answered: answeredCount(r), totalPlayers: ps.length, manual: !!r.manual });
   ps.forEach(p => {
     const rank = correctOnes.findIndex(x => x.sid === p.sid);
-    io.to(p.sid).emit('player:reveal', { correct: p.lastCorrect, points: p.lastPoints, score: p.score, speedRank: p.lastCorrect ? rank + 1 : null, correctCount: correctOnes.length, correctIndex: r.curCorrect, correctText: r.curOpts[r.curCorrect], explain, top: leaderboard.slice(0, 3) });
+    io.to(p.sid).emit('player:reveal', { correct: p.lastCorrect, points: p.lastPoints, score: p.score, speedRank: p.lastCorrect ? rank + 1 : null, correctCount: correctOnes.length, correctIndex: r.curCorrect, correctText: r.curOpts[r.curCorrect], explain, top: leaderboard.slice(0, 3), manual: !!r.manual });
   });
 }
 
